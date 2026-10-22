@@ -1,0 +1,83 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # 1. СБОРКА: тесты + артефакт dist/todo-app.tar.gz (хранится 30 дней во вкладке Actions)
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: ./scripts/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: todo-app
+          path: dist/todo-app.tar.gz
+          retention-days: 30
+
+  # 2. УПАКОВКА: берём артефакт сборки, кладём в Docker-образ, публикуем в GHCR
+  package:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: todo-app
+          path: dist
+      - name: Распаковать артефакт (он заменяет ./app, образ собирается из него)
+        run: |
+          rm -rf app
+          tar -xzf dist/todo-app.tar.gz
+      - id: meta
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          build-args: APP_VERSION=${{ github.sha }}
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ github.sha }}
+            ${{ steps.meta.outputs.image }}:latest
+
+  # 3. ДЕПЛОЙ: копируем compose/мониторинг/скрипты на сервер и запускаем scripts/deploy.sh
+  deploy:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Деплой по SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          IMAGE: ${{ needs.package.outputs.image }}:${{ github.sha }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          OPTS="-i $HOME/.ssh/id_deploy"
+          ssh $OPTS "$SSH_USER@$SSH_HOST" "mkdir -p ~/todo-tracker"
+          scp $OPTS -r docker-compose.yml monitoring scripts "$SSH_USER@$SSH_HOST:~/todo-tracker/"
+          echo "$GHCR_TOKEN" | ssh $OPTS "$SSH_USER@$SSH_HOST" \
+            "cd ~/todo-tracker && IMAGE='$IMAGE' GHCR_USER='$GHCR_USER' bash scripts/deploy.sh"

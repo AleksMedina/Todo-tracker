@@ -1,0 +1,7 @@
+.git
+.github
+dist
+.venv-build
+**/__pycache__
+app/tests
+*.db

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Задачи на семестр</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --desk: #e9eef5; --paper: #ffffff; --ink: #1f2a3a; --muted: #5f6e84; --rule: #cfdcee;
+    --hot: #c62f2f; --high: #b4600d; --rest: #2b5fd9; --done: #17803f; --accent: #2b5fd9;
+    --box-default: #d93636; /* цвет квадратика по умолчанию, меняется в настройках */
+    --tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='%231f9d55' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --desk: #141a24; --paper: #1d2533; --ink: #e6ebf3; --muted: #9aa8be; --rule: #324058;
+      --hot: #ff7b7b; --high: #f0a050; --rest: #7aa2ff; --done: #5fd08a; --accent: #7aa2ff;
+      --tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8' fill='none' stroke='%234ade80' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 28px 16px 48px; background: var(--desk); color: var(--ink);
+         font: 17px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 660px; margin: 0 auto; display: grid; gap: 16px; }
+  h1 { margin: 0; font-size: 28px; }
+  #summary { margin: 2px 0 0; color: var(--muted); font-size: 15px; min-height: 1.5em; }
+
+  /* Блок = «лист» с цветной полосой слева */
+  .sheet { background: var(--paper); border: 1px solid var(--rule); border-left: 5px solid var(--s, var(--rule));
+           border-radius: 4px; padding: 14px 20px; }
+  .s-hot { --s: var(--hot); } .s-high { --s: var(--high); }
+  .s-rest { --s: var(--rest); } .s-done { --s: var(--done); } .s-form { --s: var(--accent); }
+  .sheet h2 { display: flex; align-items: baseline; gap: 8px; margin: 0; font-size: 19px; color: var(--s); }
+  .count { font-size: 15px; font-weight: 400; color: var(--muted); }
+  .hint { margin: 0 0 6px; color: var(--muted); font-size: 14px; }
+
+  /* Форма */
+  form { display: grid; gap: 12px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+  .row.main > input { flex: 1; min-width: 0; }
+  .field { display: grid; gap: 2px; font-size: 14px; color: var(--muted); }
+  input[type=text], input[type=datetime-local], select {
+    font: inherit; color: var(--ink); background: var(--paper);
+    border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px; }
+  button { font: inherit; cursor: pointer; }
+  .add { padding: 9px 18px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .add { color: #0d1320; } }
+  .ghost { padding: 7px 12px; border: 1px solid var(--rule); border-radius: 6px; background: none; color: var(--ink); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* Список */
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-top: 1px solid var(--rule); }
+  .body { flex: 1; min-width: 0; }
+  .title { display: block; cursor: pointer; overflow-wrap: anywhere; }
+  li.done .title { color: var(--muted); text-decoration: line-through; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 2px; font-size: 13px; }
+  .prio { font-size: 13px; padding: 0 4px; border-color: transparent; background: transparent; cursor: pointer; }
+  .prio:hover { border-color: var(--rule); }
+  .prio.p1 { color: var(--hot); font-weight: 600; }
+  .prio.p2, .prio.p3 { color: var(--muted); }
+  .due { color: var(--muted); }
+  .due.overdue { color: var(--hot); font-weight: 600; }
+  .due.soon { color: var(--high); font-weight: 600; }
+
+  /* Чекбокс: красная рамка (или цвет пользователя), зелёная галочка */
+  .box { appearance: none; -webkit-appearance: none; flex: none; width: 22px; height: 22px; margin: 2px 0 0;
+         border: 2px solid var(--box, var(--box-default)); border-radius: 5px; cursor: pointer;
+         background: transparent center / 16px no-repeat; }
+  .box:checked { background-image: var(--tick); }
+
+  /* Выбор цвета: круглый кружок */
+  .swatch { appearance: none; -webkit-appearance: none; flex: none; width: 24px; height: 24px; margin: 1px 0 0;
+            padding: 0; border: 2px solid var(--rule); border-radius: 50%; background: none; cursor: pointer; }
+  .swatch::-webkit-color-swatch-wrapper { padding: 0; }
+  .swatch::-webkit-color-swatch { border: 0; border-radius: 50%; }
+  .swatch::-moz-color-swatch { border: 0; border-radius: 50%; }
+  .del { border: 0; background: none; color: var(--muted); font-size: 22px; line-height: 1; padding: 2px 6px; border-radius: 4px; }
+  .del:hover { color: var(--hot); }
+
+  #empty, #error { margin: 0; color: var(--muted); }
+  #error { color: var(--hot); }
+  details.sheet summary { cursor: pointer; font-weight: 600; }
+  details.sheet[open] summary { margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Задачи на семестр</h1>
+    <p id="summary" aria-live="polite"></p>
+  </header>
+
+  <form id="form" class="sheet s-form">
+    <div class="row main">
+      <input id="title" type="text" maxlength="200" required autocomplete="off"
+             placeholder="Например: сделать лабу по сетям" aria-label="Название задачи">
+      <button class="add" type="submit">Добавить</button>
+    </div>
+    <div class="row">
+      <label class="field">Дедлайн
+        <input id="deadline" type="datetime-local">
+      </label>
+      <label class="field">Приоритет
+        <select id="priority">
+          <option value="1">Высокий</option>
+          <option value="2" selected>Средний</option>
+          <option value="3">Низкий</option>
+        </select>
+      </label>
+      <label class="field">Цвет
+        <input id="color" class="swatch" type="color" value="#d93636">
+      </label>
+    </div>
+  </form>
+
+  <p id="error" hidden></p>
+  <div id="sections"></div>
+  <p id="empty" hidden>Список пуст. Добавьте первую задачу: лабу, отчёт или дедлайн по курсовой.</p>
+
+  <details class="sheet">
+    <summary>Цвета квадратиков</summary>
+    <div class="row">
+      <label class="field">По умолчанию
+        <input id="defaultColor" class="swatch" type="color" value="#d93636">
+      </label>
+      <button id="resetDefault" class="ghost" type="button">Вернуть красный</button>
+      <button id="resetTasks" class="ghost" type="button">Сбросить цвета у всех задач</button>
+    </div>
+    <p class="hint">Цвет отдельной задачи меняется кружком справа от неё.</p>
+  </details>
+</div>
+
+<script>
+const PRIORITIES = { 1: "Высокий", 2: "Средний", 3: "Низкий" };
+const DEFAULT_RED = "#d93636";
+const SECTIONS = [
+  { id: "hot", title: "Горит", hint: "Просрочено или до дедлайна меньше суток", match: t => t.status === "overdue" || t.status === "soon" },
+  { id: "high", title: "Высокий приоритет", match: t => t.status === "normal" && t.priority === 1 },
+  { id: "rest", title: "Остальные", match: t => t.status === "normal" && t.priority !== 1 },
+  { id: "done", title: "Выполнено", match: t => t.status === "done" },
+];
+
+const $ = id => document.getElementById(id);
+const sections = $("sections"), errorBox = $("error"), summary = $("summary"), empty = $("empty");
+const titleInput = $("title"), deadlineInput = $("deadline"), prioInput = $("priority"), colorInput = $("color");
+const defaultInput = $("defaultColor");
+let colorTouched = false;
+
+const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids); return n; };
+const showError = msg => { errorBox.textContent = msg; errorBox.hidden = false; };
+
+async function api(url, method = "GET", body) {
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Ошибка сервера");
+  return res.status === 204 ? null : res.json();
+}
+
+// --- Цвет по умолчанию (хранится в браузере) ---
+function getDefault() {
+  try { return localStorage.getItem("boxColor") || DEFAULT_RED; } catch { return DEFAULT_RED; }
+}
+function setDefault(color) {
+  try { localStorage.setItem("boxColor", color); } catch { /* хранилище недоступно */ }
+  applyDefault(color);
+}
+function applyDefault(color) {
+  document.documentElement.style.setProperty("--box-default", color);
+  defaultInput.value = color;
+  if (!colorTouched) colorInput.value = color;
+}
+
+// --- Отображение ---
+function fmtDue(t) {
+  if (!t.deadline) return "";
+  const d = new Date(t.deadline);
+  const abs = d.toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  if (t.done) return `до ${abs}`;
+  const ms = d - Date.now();
+  const mins = Math.max(1, Math.round(Math.abs(ms) / 60000));
+  const span = mins < 60 ? `${mins} мин` : mins < 2880 ? `${Math.round(mins / 60)} ч` : `${Math.round(mins / 1440)} дн`;
+  return ms < 0 ? `${abs}, просрочено на ${span}` : `${abs}, осталось ${span}`;
+}
+
+function taskItem(t) {
+  const id = `task-${t.id}`;
+  const li = el("li", { className: t.done ? "done" : "" });
+  if (t.color) li.style.setProperty("--box", t.color);
+
+  const box = el("input", { type: "checkbox", id, className: "box", checked: !!t.done });
+  box.addEventListener("change", () => act(() => api(`/api/tasks/${t.id}`, "PATCH", { done: box.checked })));
+
+  const prio = el("select", { className: `prio p${t.priority}` });
+  prio.setAttribute("aria-label", `Приоритет: ${t.title}`);
+  for (const [value, name] of Object.entries(PRIORITIES)) {
+    prio.append(el("option", { value, textContent: `${name} приоритет`, selected: Number(value) === t.priority }));
+  }
+  prio.addEventListener("change", () => act(() => api(`/api/tasks/${t.id}`, "PATCH", { priority: Number(prio.value) })));
+
+  const meta = el("div", { className: "meta" }, prio);
+  const due = fmtDue(t);
+  if (due) meta.append(el("span", { className: `due ${t.status}`, textContent: due }));
+
+  const body = el("div", { className: "body" },
+    el("label", { htmlFor: id, className: "title", textContent: t.title }), meta);
+
+  const swatch = el("input", { type: "color", className: "swatch", value: t.color || getDefault() });
+  swatch.title = "Цвет квадратика";
+  swatch.setAttribute("aria-label", `Цвет квадратика: ${t.title}`);
+  swatch.addEventListener("change", () => act(() => api(`/api/tasks/${t.id}`, "PATCH", { color: swatch.value })));
+
+  const del = el("button", { className: "del", type: "button", textContent: "×" });
+  del.setAttribute("aria-label", `Удалить: ${t.title}`);
+  del.addEventListener("click", () => act(() => api(`/api/tasks/${t.id}`, "DELETE")));
+
+  li.append(box, body, swatch, del);
+  return li;
+}
+
+function render(tasks) {
+  const prev = document.activeElement;
+  const keepFocus = sections.contains(prev) ? prev.id : null;
+
+  sections.replaceChildren();
+  sections.style.display = "grid";
+  sections.style.gap = "16px";
+  for (const s of SECTIONS) {
+    const items = tasks.filter(s.match);
+    if (!items.length) continue;
+    const list = el("ul", {}, ...items.map(taskItem));
+    const heading = el("h2", {}, s.title, el("span", { className: "count", textContent: String(items.length) }));
+    const block = el("section", { className: `sheet s-${s.id}` }, heading);
+    if (s.hint) block.append(el("p", { className: "hint", textContent: s.hint }));
+    block.append(list);
+    sections.append(block);
+  }
+
+  const done = tasks.filter(t => t.done).length;
+  const overdue = tasks.filter(t => t.status === "overdue").length;
+  summary.textContent = tasks.length
+    ? `Выполнено ${done} из ${tasks.length}` + (overdue ? `, просрочено ${overdue}` : "")
+    : "";
+  empty.hidden = tasks.length > 0;
+  if (keepFocus) document.getElementById(keepFocus)?.focus();
+}
+
+async function load() {
+  try {
+    render(await api("/api/tasks"));
+    errorBox.hidden = true;
+  } catch (e) {
+    showError(`Не удалось загрузить задачи: ${e.message}`);
+  }
+}
+
+async function act(fn) {
+  try { await fn(); } catch (e) { showError(e.message); return; }
+  load();
+}
+
+// --- События ---
+$("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const title = titleInput.value.trim();
+  if (!title) return;
+  const payload = { title, priority: Number(prioInput.value) };
+  if (deadlineInput.value) payload.deadline = new Date(deadlineInput.value).toISOString();
+  if (colorTouched) payload.color = colorInput.value;
+  try { await api("/api/tasks", "POST", payload); } catch (err) { showError(err.message); return; }
+  titleInput.value = "";
+  deadlineInput.value = "";
+  prioInput.value = "2";
+  colorTouched = false;
+  colorInput.value = getDefault();
+  titleInput.focus();
+  load();
+});
+
+colorInput.addEventListener("input", () => { colorTouched = true; });
+defaultInput.addEventListener("change", () => setDefault(defaultInput.value));
+$("resetDefault").addEventListener("click", () => setDefault(DEFAULT_RED));
+$("resetTasks").addEventListener("click", () => {
+  if (confirm("Сбросить цвета у всех задач к цвету по умолчанию?")) act(() => api("/api/tasks/reset-colors", "POST"));
+});
+
+// Порядок и «горит» зависят от времени, поэтому список обновляется сам
+setInterval(() => {
+  const a = document.activeElement;
+  if (sections.contains(a) && a.type !== "checkbox") return; // не мешаем выбору цвета или приоритета
+  load();
+}, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+
+applyDefault(getDefault());
+load();
+</script>
+</body>
+</html>
