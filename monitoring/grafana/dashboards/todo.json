@@ -2,101 +2,363 @@
   "uid": "todo-tracker",
   "title": "Трекер задач: мониторинг",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 3,
   "refresh": "15s",
-  "time": { "from": "now-3h", "to": "now" },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
   "panels": [
     {
-      "id": 1, "type": "stat", "title": "Health check (SQLite)",
-      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "options": { "colorMode": "background", "graphMode": "none" },
-      "fieldConfig": { "defaults": {
-        "mappings": [ { "type": "value", "options": {
-          "0": { "text": "DOWN", "color": "red" },
-          "1": { "text": "UP", "color": "green" } } } ] }, "overrides": [] },
-      "targets": [ { "refId": "A", "expr": "todo_db_up" } ]
-    },
-    {
-      "id": 2, "type": "stat", "title": "Невыполненных задач",
-      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [ { "refId": "A", "expr": "todo_tasks_open" } ]
-    },
-    {
-      "id": 3, "type": "stat", "title": "Страница открыта за последний час",
-      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "decimals": 0 }, "overrides": [] },
-      "targets": [ { "refId": "A", "expr": "increase(todo_page_visits_total[1h])" } ]
-    },
-    {
-      "id": 4, "type": "stat", "title": "Prometheus видит приложение",
-      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": {
-        "mappings": [ { "type": "value", "options": {
-          "0": { "text": "DOWN", "color": "red" },
-          "1": { "text": "UP", "color": "green" } } } ] }, "overrides": [] },
-      "targets": [ { "refId": "A", "expr": "up{job=\"todo-app\"}" } ]
-    },
-    {
-      "id": 5, "type": "timeseries", "title": "Задачи в час: добавлено / выполнено",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "decimals": 0 }, "overrides": [] },
+      "id": 1,
+      "type": "stat",
+      "title": "Health check (SQLite)",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
       "targets": [
-        { "refId": "A", "legendFormat": "добавлено", "expr": "increase(todo_tasks_added_total[1h])" },
-        { "refId": "B", "legendFormat": "выполнено", "expr": "increase(todo_tasks_completed_total[1h])" }
+        {
+          "refId": "A",
+          "expr": "todo_db_up"
+        }
       ]
     },
     {
-      "id": 6, "type": "timeseries", "title": "Посещения в час",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "decimals": 0 }, "overrides": [] },
-      "targets": [ { "refId": "A", "legendFormat": "посещения", "expr": "increase(todo_page_visits_total[1h])" } ]
-    },
-    {
-      "id": 7, "type": "timeseries", "title": "Контейнер приложения: CPU",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
-      "targets": [ { "refId": "A", "legendFormat": "todo-app", "expr": "rate(container_cpu_usage_seconds_total{name=\"todo-app\"}[1m])" } ]
-    },
-    {
-      "id": 8, "type": "timeseries", "title": "Контейнер приложения: память",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
-      "targets": [ { "refId": "A", "legendFormat": "todo-app", "expr": "container_memory_working_set_bytes{name=\"todo-app\"}" } ]
-    },
-    {
-      "id": 9, "type": "timeseries", "title": "Сервер: память (занято / доступно / всего)",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 21 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "id": 2,
+      "type": "stat",
+      "title": "Невыполненных задач",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
-        { "refId": "A", "legendFormat": "занято", "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes" },
-        { "refId": "B", "legendFormat": "доступно", "expr": "node_memory_MemAvailable_bytes" },
-        { "refId": "C", "legendFormat": "всего", "expr": "node_memory_MemTotal_bytes" }
+        {
+          "refId": "A",
+          "expr": "todo_tasks_open"
+        }
       ]
     },
     {
-      "id": 10, "type": "timeseries", "title": "Сервер: CPU (занято)",
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 21 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "percentunit", "max": 1, "min": 0 }, "overrides": [] },
-      "targets": [ { "refId": "A", "legendFormat": "CPU", "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[1m]))" } ]
+      "id": 3,
+      "type": "stat",
+      "title": "Страница открыта за последний час",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "increase(todo_page_visits_total[1h])"
+        }
+      ]
     },
     {
-      "id": 11, "type": "timeseries", "title": "Сервер: диск / (занято / свободно)",
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 21 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "id": 4,
+      "type": "stat",
+      "title": "Prometheus видит приложение",
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
       "targets": [
-        { "refId": "A", "legendFormat": "занято", "expr": "node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"rootfs\"} - node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"rootfs\"}" },
-        { "refId": "B", "legendFormat": "свободно", "expr": "node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"rootfs\"}" }
+        {
+          "refId": "A",
+          "expr": "up{job=\"todo-app\"}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Задачи в час: добавлено / выполнено",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "legendFormat": "добавлено",
+          "expr": "increase(todo_tasks_added_total[1h])"
+        },
+        {
+          "refId": "B",
+          "legendFormat": "выполнено",
+          "expr": "increase(todo_tasks_completed_total[1h])"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Посещения в час",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "legendFormat": "посещения",
+          "expr": "increase(todo_page_visits_total[1h])"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Приложение: потребление CPU",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "legendFormat": "процесс приложения",
+          "expr": "rate(process_cpu_seconds_total{job=\"todo-app\"}[1m])"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Приложение: потребление памяти",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "legendFormat": "процесс приложения",
+          "expr": "process_resident_memory_bytes{job=\"todo-app\"}"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Сервер: память (занято / доступно / всего)",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "legendFormat": "занято",
+          "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes"
+        },
+        {
+          "refId": "B",
+          "legendFormat": "доступно",
+          "expr": "node_memory_MemAvailable_bytes"
+        },
+        {
+          "refId": "C",
+          "legendFormat": "всего",
+          "expr": "node_memory_MemTotal_bytes"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Сервер: CPU (занято)",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "max": 1,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "legendFormat": "CPU",
+          "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[1m]))"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Сервер: диск / (занято / свободно)",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 21
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "legendFormat": "занято",
+          "expr": "node_filesystem_size_bytes{mountpoint=\"/\",fstype!=\"rootfs\"} - node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"rootfs\"}"
+        },
+        {
+          "refId": "B",
+          "legendFormat": "свободно",
+          "expr": "node_filesystem_avail_bytes{mountpoint=\"/\",fstype!=\"rootfs\"}"
+        }
       ]
     }
   ]
