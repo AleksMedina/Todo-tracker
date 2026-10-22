@@ -45,17 +45,6 @@ services:
     depends_on:
       - prometheus
 
-  cadvisor:                    # ресурсы контейнеров (сколько потребляет приложение)
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
-    container_name: cadvisor
-    restart: unless-stopped
-    privileged: true
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-
   node-exporter:               # ресурсы сервера (сколько всего и сколько свободно)
     image: prom/node-exporter:v1.8.1
     container_name: node-exporter
