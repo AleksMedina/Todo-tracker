@@ -15,4 +15,4 @@ echo "==> Артефакт сборки"
 mkdir -p dist
 tar -czf dist/todo-app.tar.gz \
   --exclude='__pycache__' --exclude='tests' --exclude='*.db' app
-ls -lh dist/todo-app.tar.gz
+ls -lh dist/todo-app.tar.gz 
